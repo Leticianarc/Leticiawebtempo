@@ -15,7 +15,7 @@
 
 > 🔁 **Primeira versão deste projeto** — JavaScript puro, sem framework, sem build e sem
 > dependências. A **segunda versão**, reconstruída em React e TypeScript, está em
-> **[previsao-tempo-react](https://github.com/Leticianarc/previsao-tempo-react)**: componentes
+> **[Previsao_Tempo_react](https://github.com/Leticianarc/Previsao_Tempo_react)**: componentes
 > no lugar da manipulação direta do DOM, tipagem estrita, camada de API isolada e
 > cancelamento de requisições concorrentes.
 
@@ -77,8 +77,8 @@ Abrir o `index.html` já executa o projeto.
 ## ▶️ Como executar
 
 ```bash
-git clone https://github.com/Leticianarc/previsao-tempo-js.git
-cd previsao-tempo-js
+git clone https://github.com/Leticianarc/Previsao_Tempo_js.git
+cd Previsao_Tempo_js
 ```
 
 Depois, abra o `index.html` no navegador — ou, no VS Code, clique em **Go Live** com a
