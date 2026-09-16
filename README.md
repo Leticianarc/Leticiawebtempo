@@ -69,8 +69,8 @@ Abrir o `index.html` já executa o projeto.
 ## ▶️ Como executar
 
 ```bash
-git clone https://github.com/Leticianarc/Leticiawebtempo.git
-cd Leticiawebtempo
+git clone https://github.com/Leticianarc/previsao-tempo-js.git
+cd previsao-tempo-js
 ```
 
 Depois, abra o `index.html` no navegador — ou, no VS Code, clique em **Go Live** com a
