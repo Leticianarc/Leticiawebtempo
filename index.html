@@ -1,35 +1,80 @@
-<!DOCTYPE html> <!--AVISAR QUE ESTAMOS USANDO A VERSÃO MAIS NOVA DO HTML -->
-<html lang = "pt-br">
+<!DOCTYPE html>
+<html lang="pt-br">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Consulte a previsão do tempo de qualquer cidade do mundo em tempo real.">
     <link rel="stylesheet" href="style.css">
-    <title>Previsão Do Tempo</title>
+    <title>Previsão do Tempo</title>
 </head>
 
 <body>
-    <div class="caixa-maior">
-        <input class = "input-cidade" placeholder = "Digite o nome da cidade">
+    <main class="caixa-maior">
 
-        <button onclick = "cliqueiNoBotao()"> <!--Quando clicar faz alguma coisa/chamar a função cliqueiNoBotao-->
-            <img class="lupa" src="https://www.svgrepo.com/show/390476/find-search-seo-view-zoom.svg">
-        </button>
+        <!-- O <form> faz o Enter funcionar sem JavaScript extra:
+             apertar Enter dentro do campo já dispara o evento submit. -->
+        <form class="busca" id="form-busca">
+            <label class="rotulo-invisivel" for="input-cidade">Nome da cidade</label>
+            <input
+                class="input-cidade"
+                id="input-cidade"
+                type="text"
+                placeholder="Digite o nome da cidade"
+                autocomplete="off">
 
-        <div class = "caixa-media">
-            
-            <h2 class = "cidade">Tempo em São Paulo</h2>
+            <button class="botao-buscar" type="submit" aria-label="Buscar cidade">
+                <!-- SVG embutido: não depende de nenhum site externo para carregar -->
+                <svg class="lupa" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <line x1="16.2" y1="16.2" x2="21" y2="21"></line>
+                </svg>
+            </button>
+        </form>
 
-            <p class = "temp">21°C</p>
+        <p class="mensagem-erro" id="mensagem-erro" role="alert" hidden></p>
 
-            <img class = "icone" src = "https://openweathermap.org/img/wn/04n.png"> 
+        <p class="carregando" id="carregando" hidden>
+            <span class="girando"></span> Buscando previsão...
+        </p>
 
-            <p class = "umidade">Umidade: 70%</p>
+        <section class="caixa-media" id="resultado" hidden>
 
-        </div>
-    </div>
+            <h2 class="cidade"></h2>
+
+            <div class="linha-principal">
+                <img class="icone" alt="">
+                <p class="temp"></p>
+            </div>
+
+            <p class="descricao"></p>
+
+            <dl class="metricas">
+                <div class="metrica">
+                    <dt>Sensação</dt>
+                    <dd class="sensacao"></dd>
+                </div>
+                <div class="metrica">
+                    <dt>Umidade</dt>
+                    <dd class="umidade"></dd>
+                </div>
+                <div class="metrica">
+                    <dt>Vento</dt>
+                    <dd class="vento"></dd>
+                </div>
+            </dl>
+
+            <section class="previsao">
+                <h3 class="titulo-previsao">Próximos dias</h3>
+                <ul class="lista-previsao" id="lista-previsao"></ul>
+            </section>
+
+        </section>
+
+    </main>
+
+    <script src="config.js"></script>
+    <script src="scripts.js"></script>
 </body>
-<script src = "config.js"></script> <!--CARREGA A CHAVE DA API ANTES DO SCRIPT PRINCIPAL-->
-<script src = "scripts.js"></script> <!--AVISA QUE O HTML CONECTOU NO JAVA SCRIPT,CONECTOU O JAVA SCRIPT COM O HTML-->
 
 </html>

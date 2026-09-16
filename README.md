@@ -17,8 +17,7 @@
 
 Aplicação web feita com **HTML, CSS e JavaScript puro**, sem frameworks e sem dependências.
 O usuário digita o nome de uma cidade e a página busca, em tempo real, os dados meteorológicos
-na API do **OpenWeatherMap**, exibindo temperatura, umidade e um ícone que representa a
-condição atual do céu.
+na API do **OpenWeatherMap**, exibindo as condições atuais e a previsão para os próximos dias.
 
 O objetivo foi entender, na prática, o caminho completo de uma requisição: **o que sai do
 navegador, o que o servidor devolve e como transformar essa resposta em algo visível na tela.**
@@ -30,14 +29,28 @@ navegador, o que o servidor devolve e como transformar essa resposta em algo vis
 
 ---
 
+## ✨ Funcionalidades
+
+- 🔍 **Busca por cidade**, pelo botão ou apertando **Enter**
+- 🌡️ **Condições atuais**: temperatura, sensação térmica, umidade e velocidade do vento
+- 📅 **Previsão dos próximos 4 dias**, com mínima, máxima e ícone da condição
+- 🇧🇷 **Descrições em português**, vindas da própria API
+- ⏳ **Indicador de carregamento** enquanto a resposta não chega
+- ⚠️ **Mensagens de erro claras** para cidade inexistente ou falha de conexão
+- 💾 **Memória da última cidade**: ao reabrir a página, ela já carrega sozinha
+- 📱 **Layout responsivo**, do celular ao desktop
+
+---
+
 ## 🛠️ Tecnologias
 
 | Tecnologia | Papel no projeto |
 | --- | --- |
 | **HTML5** | Estrutura da página e marcação semântica |
-| **CSS3** | Estilização, layout com Flexbox e responsividade |
+| **CSS3** | Estilização, layout com Flexbox e Grid, responsividade |
 | **JavaScript** | Lógica, manipulação do DOM e consumo da API |
 | **Fetch API** | Requisições HTTP ao servidor do OpenWeatherMap |
+| **localStorage** | Guarda a última cidade pesquisada no navegador |
 | **OpenWeatherMap** | Fonte dos dados meteorológicos |
 
 Nenhuma biblioteca externa, nenhum passo de build. Abrir o `index.html` já executa o projeto.
@@ -100,9 +113,9 @@ extensão Live Server instalada.
 
 ```
 Tempo/
-├── index.html          # Estrutura da página: campo de busca, botão e área de resultado
-├── style.css           # Estilos: fundo, caixa central, tipografia e botão
-├── scripts.js          # Lógica: captura da cidade, requisição à API e escrita na tela
+├── index.html          # Estrutura da página: busca, estados de erro/carregamento e resultado
+├── style.css           # Estilos: gradiente de fundo, cartão central, métricas e previsão
+├── scripts.js          # Lógica: requisições, tratamento dos dados e escrita na tela
 ├── config.example.js   # Modelo de configuração da chave (versionado)
 ├── config.js           # Sua chave real (NÃO versionado)
 └── .gitignore
@@ -112,74 +125,95 @@ Tempo/
 
 ## 🔄 Como funciona
 
-O fluxo completo, do clique até o dado na tela:
+O fluxo completo, da abertura da página até o dado na tela:
 
-**1.** O usuário digita o nome da cidade no campo de busca
+**1.** Ao abrir, a página lê a **última cidade pesquisada** no `localStorage` — se não houver
+nenhuma, usa São Paulo como padrão
 
-**2.** Ao clicar na lupa, o `onclick` dispara a função `cliqueiNoBotao()`
+**2.** O usuário digita outra cidade e aperta **Enter** ou clica na lupa
 
-**3.** Essa função lê o valor digitado com `document.querySelector('.input-cidade').value`
+**3.** O evento `submit` do formulário dispara a busca (é o `<form>` que faz o Enter funcionar)
 
-**4.** O valor é passado para `buscarCidade(cidade)`
+**4.** A tela mostra o indicador de **carregando** e limpa qualquer erro anterior
 
-**5.** A função monta a URL da API e envia a requisição com `fetch`
+**5.** Duas requisições partem **ao mesmo tempo** com `Promise.all`: uma para o clima atual,
+outra para a previsão dos próximos dias
 
-**6.** A resposta chega em **JSON** e é convertida com `.then((resposta) => resposta.json())`
+**6.** As respostas chegam em **JSON**; os blocos da previsão são agrupados por dia
 
-**7.** Os dados vão para `colocarNaTela(dados)`, que escreve cada informação no seu elemento
+**7.** Os dados são escritos na tela e a cidade é salva no `localStorage`
 
 ```
-[ usuário digita ] → cliqueiNoBotao() → buscarCidade() → fetch → API
-                                                                   ↓
-[ tela atualizada ] ← colocarNaTela(dados) ←────────────── resposta JSON
+[ abre a página ] → localStorage → buscarCidade()
+                                        ↓
+[ usuário busca ] → submit ─────→ Promise.all ─→ weather  ─┐
+                                        │      └→ forecast ─┤
+                                        ↓                   ↓
+[ tela atualizada ] ←── colocarNaTela() ←──── respostas JSON
 ```
+
+Se algo falha, o `catch` exibe a mensagem e o `finally` garante que o indicador de
+carregamento sempre desapareça — com sucesso ou com erro.
 
 ---
 
 ## 🌐 Entendendo a requisição
 
-A URL enviada ao servidor é montada juntando quatro partes:
+O projeto usa **dois endpoints** do OpenWeatherMap, montados da mesma forma:
 
 ```
-https://api.openweathermap.org/data/2.5/weather?q=CIDADE&appid=CHAVE&units=metric
+https://api.openweathermap.org/data/2.5/weather?q=CIDADE&appid=CHAVE&units=metric&lang=pt_br
+https://api.openweathermap.org/data/2.5/forecast?q=CIDADE&appid=CHAVE&units=metric&lang=pt_br
 ```
 
 | Parte | O que significa |
 | --- | --- |
-| `api.openweathermap.org/data/2.5/weather` | Endereço do serviço que devolve o clima atual |
+| `/weather` | Condições **atuais** da cidade |
+| `/forecast` | Previsão de **5 dias**, em blocos de 3 em 3 horas |
 | `?q=CIDADE` | Parâmetro de busca — o nome da cidade digitada |
 | `&appid=CHAVE` | Identifica quem está fazendo a requisição |
 | `&units=metric` | Pede a temperatura em **Celsius** (sem isso, vem em Kelvin) |
+| `&lang=pt_br` | Pede as descrições em **português** |
 
 O `?` marca o início dos parâmetros e o `&` separa um parâmetro do próximo.
 
-### 📥 A resposta
+O nome da cidade passa por `encodeURIComponent()` antes de entrar na URL — é isso que faz
+`"São Paulo"` virar `"S%C3%A3o%20Paulo"` e a busca funcionar com espaços e acentos.
 
-O servidor devolve um objeto JSON. O projeto usa quatro campos dele:
+### 📥 A resposta do clima atual
 
 ```json
 {
   "name": "São Paulo",
-  "main": {
-    "temp": 21.34,
-    "humidity": 70
-  },
-  "weather": [
-    { "icon": "04n" }
-  ]
+  "sys": { "country": "BR" },
+  "main": { "temp": 21.34, "feels_like": 21.9, "humidity": 70 },
+  "wind": { "speed": 3.6 },
+  "weather": [ { "description": "nublado", "icon": "04n" } ]
 }
 ```
 
 | Campo usado | Vira na tela |
 | --- | --- |
-| `dados.name` | Nome da cidade no título |
-| `dados.main.temp` | Temperatura, arredondada com `Math.floor()` |
+| `dados.name` + `dados.sys.country` | Cidade e país no título |
+| `dados.main.temp` | Temperatura, arredondada com `Math.round()` |
+| `dados.main.feels_like` | Sensação térmica |
 | `dados.main.humidity` | Percentual de umidade |
+| `dados.wind.speed` | Vento — vem em m/s e é convertido para km/h (× 3,6) |
 | `dados.weather[0].icon` | Código do ícone, usado para montar a URL da imagem |
 
 > 💡 `weather` é uma **lista**, por isso o `[0]`: pegamos a primeira condição descrita.
 > O código do ícone (`04n`) forma o endereço da imagem:
-> `https://openweathermap.org/img/wn/04n.png`
+> `https://openweathermap.org/img/wn/04n@2x.png`
+
+### 📅 A previsão dos próximos dias
+
+O endpoint `/forecast` devolve **40 blocos de 3 em 3 horas**, não um por dia. Para exibir um
+cartão por dia, o projeto agrupa os blocos pela data e, em cada grupo:
+
+- guarda a **menor** e a **maior** temperatura encontradas
+- escolhe o ícone do bloco mais **próximo do meio-dia**, que representa melhor a condição
+  geral do que um bloco da madrugada
+- descarta o dia de hoje, que já aparece no topo da tela
 
 ---
 
@@ -192,39 +226,43 @@ a uma URL e devolve o que o servidor responder.
 esta linha terminar antes de seguir". Sem isso, o código tentaria usar dados que ainda não
 chegaram. A função só pode usar `await` se for declarada como `async`.
 
-**`.then()`** — "então, quando terminar, faça isto". Aqui é usado para converter a resposta
-bruta em JSON.
+**`Promise.all`** — quando duas requisições não dependem uma da outra, elas partem juntas e
+esperamos as duas terminarem. É mais rápido do que buscar uma, esperar, e só então buscar a outra.
+
+**`try / catch / finally`** — `try` tenta, `catch` captura o erro e mostra uma mensagem
+compreensível, e `finally` roda de qualquer jeito. É o `finally` que garante que o "carregando"
+sempre suma, mesmo quando a busca falha.
+
+**Status HTTP** — o servidor responde com um número junto dos dados. `404` significa "não
+encontrei essa cidade", e é por isso que dá para mostrar uma mensagem específica em vez de
+um erro genérico.
 
 **JSON** — *JavaScript Object Notation*, o formato de texto em que os dados trafegam entre
 servidor e navegador. Depois de convertido, é acessado com ponto: `dados.main.temp`.
 
-**Manipulação do DOM** — `document.querySelector()` localiza um elemento pela classe e
-`.innerHTML` troca o conteúdo dele. É assim que o dado que veio da internet aparece na página.
+**Manipulação do DOM** — `document.querySelector()` localiza um elemento e `.innerHTML` troca
+o conteúdo dele. É assim que o dado que veio da internet aparece na página.
 
-**Flexbox** — no CSS, `display: flex` com `align-items: center` e `justify-content: center`
-centraliza a caixa na vertical e na horizontal, em qualquer tamanho de tela.
+**`localStorage`** — pequeno armazenamento do próprio navegador. Guarda a última cidade mesmo
+depois de fechar a aba. Como ele pode estar bloqueado (janela anônima, cookies desativados),
+a leitura e a escrita ficam dentro de `try / catch`.
+
+**Flexbox e Grid** — `flex` alinha a busca e centraliza o cartão; `grid` organiza as três
+métricas em colunas iguais e alinha os cartões da previsão.
+
+**Acessibilidade** — o campo tem rótulo associado, o botão tem `aria-label`, os ícones têm
+texto alternativo e a mensagem de erro usa `role="alert"` para ser anunciada por leitores de tela.
 
 ---
 
 ## 🎨 Estilização
 
-- Fundo em imagem ocupando a tela inteira com `background-size: cover`
-- Caixa central escura com `opacity` e `border-radius`, garantindo leitura sobre a imagem
-- Botão circular com `border-radius: 50%` e retorno visual no `:hover`
-- Campo de busca com largura calculada por `calc(100% - 100px)`, para o botão caber ao lado
+- Fundo em **gradiente**, sem depender de imagem externa — carrega sempre e instantaneamente
+- Cartão central escuro com `backdrop-filter: blur()`, efeito de vidro sobre o gradiente
+- Métricas em **grid de três colunas**, com rótulos em caixa alta e espaçamento entre letras
+- Indicador de carregamento animado com `@keyframes`, respeitando `prefers-reduced-motion`
+- Botão circular com retorno visual no `:hover` e foco visível no teclado
 - Reset inicial com `* { margin: 0; padding: 0; box-sizing: border-box; }`
-
----
-
-## 🚀 Melhorias futuras
-
-- [ ] Tratar cidade não encontrada — hoje, um nome inválido não exibe mensagem de erro
-- [ ] Permitir buscar apertando **Enter**, além do clique na lupa
-- [ ] Trocar a imagem de fundo: o serviço `source.unsplash.com` foi descontinuado
-- [ ] Exibir sensação térmica, velocidade do vento e previsão dos próximos dias
-- [ ] Mostrar um indicador de carregamento enquanto a resposta não chega
-- [ ] Guardar a última cidade pesquisada e carregá-la ao abrir a página
-- [ ] Publicar na Vercel ou Netlify com link de demonstração
 
 ---
 
