@@ -13,6 +13,14 @@
 
 ---
 
+> 🔁 **Este projeto existe em duas versões.** Esta é a original, em JavaScript puro — sem
+> framework, sem build e sem dependências. A mesma ideia foi reconstruída em
+> **[previsao-tempo-react](https://github.com/Leticianarc/previsao-tempo-react)**, trocando a
+> manipulação direta do DOM por componentes, adicionando tipagem estrita, camada de API
+> isolada e cancelamento de requisições concorrentes.
+
+---
+
 ## 📋 Sobre o projeto
 
 Aplicação web feita com **HTML, CSS e JavaScript puro**, sem frameworks e sem dependências.
