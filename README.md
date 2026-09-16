@@ -13,11 +13,11 @@
 
 ---
 
-> 🔁 **Este projeto existe em duas versões.** Esta é a original, em JavaScript puro — sem
-> framework, sem build e sem dependências. A mesma ideia foi reconstruída em
-> **[previsao-tempo-react](https://github.com/Leticianarc/previsao-tempo-react)**, trocando a
-> manipulação direta do DOM por componentes, adicionando tipagem estrita, camada de API
-> isolada e cancelamento de requisições concorrentes.
+> 🔁 **Primeira versão deste projeto** — JavaScript puro, sem framework, sem build e sem
+> dependências. A **segunda versão**, reconstruída em React e TypeScript, está em
+> **[previsao-tempo-react](https://github.com/Leticianarc/previsao-tempo-react)**: componentes
+> no lugar da manipulação direta do DOM, tipagem estrita, camada de API isolada e
+> cancelamento de requisições concorrentes.
 
 ---
 
